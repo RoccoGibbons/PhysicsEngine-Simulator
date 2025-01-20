@@ -1,6 +1,7 @@
 #include <glad/glad.h>   // This header has to be first for some reason -> remember this or else it crashess
 #include <GLFW/glfw3.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -16,10 +17,10 @@ const char *vertexShaderSource = "#version 330 core\n"
 
 // A fragment shader determines the colour
 const char *fragmentShaderSource = "#version 330 core\n"
-    "out vec 4 FragColour;\n"
+    "out vec4 FragColor;\n"
     "void main(){\n"
-    "   FragColour = vec4(1.0f, 0.5f, 0.2f, 1.0f)\n"
-    "}\0";
+    "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+    "}\n\0";
 
 
 int main() {
@@ -112,8 +113,9 @@ int main() {
     };
 
     // We make our VBO, then we generate a buffer, then we bind this buffer to the array buffer, then copies the vertex data from our triangle into the buffers memory
-    unsigned int VBO;  //VBO stands for Vertex Buffer Objects
+    unsigned int VBO, VAO;  //VBO stands for Vertex Buffer Objects
     glGenBuffers(1, &VBO);
+    glGenVertexArrays(1, &VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
