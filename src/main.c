@@ -105,20 +105,33 @@ int main() {
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
-    // Our triangle shape
+    // Our rectangle shape (made of 2 triangles)
     float vertices[] = {
-        -0.5f, -0.5f, 0.0f,
+        0.5f, 0.5f, 0.0f,
         0.5f, -0.5f, 0.0f,
-        0.0f, 0.5f, 0.0f
+        -0.5f, -0.5f, 0.0f,
+        -0.5f, 0.5f, 0.0f,
+    };
+
+    unsigned int indices[] = {
+        0, 1, 3,
+        1, 2, 3,
     };
 
     // We make our VBO, then we generate a buffer, then we bind this buffer to the array buffer, then copies the vertex data from our triangle into the buffers memory
-    unsigned int VBO, VAO;  //VBO stands for Vertex Buffer Objects
+    unsigned int VBO, VAO, EBO;  //VBO stands for Vertex Buffer Objects
+
     glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
+
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
 
     // Linking Vertex Attributes
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
@@ -135,7 +148,8 @@ int main() {
 
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
 
         // Check and call events and swap buffers
         glfwSwapBuffers(window);
