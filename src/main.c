@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <math.h>
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -10,16 +11,20 @@ void process_input(GLFWwindow* window);
 // Our shader source code
 const char *vertexShaderSource = "#version 330 core\n"
     "layout (location = 0) in vec3 aPos;\n"
+    "layout (location = 1) in vec3 aColor;"
+    "out vec3 ourColor;\n"
     "void main(){\n"
     "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-    "}\0";
+    "   ourColor = aColor;\n"
+    "}\n\0";
 
 
 // A fragment shader determines the colour
 const char *fragmentShaderSource = "#version 330 core\n"
     "out vec4 FragColor;\n"
+    "in vec3 ourColor;\n"    //This is recieved from the vertex shader
     "void main(){\n"
-    "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+    "   FragColor = vec4(ourColor, 1.0);\n"
     "}\n\0";
 
 
@@ -106,16 +111,26 @@ int main() {
     glDeleteShader(fragmentShader);
 
     // Our rectangle shape (made of 2 triangles)
-    float vertices[] = {
-        0.5f, 0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        -0.5f, -0.5f, 0.0f,
-        -0.5f, 0.5f, 0.0f,
-    };
+    // float vertices[] = {
+    //     0.5f, 0.5f, 0.0f,
+    //     0.5f, -0.5f, 0.0f,
+    //     -0.5f, -0.5f, 0.0f,
+    //     -0.5f, 0.5f, 0.0f,
+    // };
 
+    float vertices[] = {
+        // Vertices               Colours
+        -0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,
+         0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,
+         0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f
+    }; 
+
+    // unsigned int indices[] = {
+    //     0, 1, 3,
+    //     1, 2, 3,
+    // };
     unsigned int indices[] = {
-        0, 1, 3,
-        1, 2, 3,
+        0, 1, 2
     };
 
     // We make our VBO, then we generate a buffer, then we bind this buffer to the array buffer, then copies the vertex data from our triangle into the buffers memory
@@ -133,9 +148,13 @@ int main() {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 
-    // Linking Vertex Attributes
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    // Position Attribute                            // stride length   offset 
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+
+    // Colour Attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3*sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     // Render loop
     while(!glfwWindowShouldClose(window)) {
@@ -146,7 +165,13 @@ int main() {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        float timeValue = glfwGetTime();
+        float greenValue =  (sin(timeValue) / 2.0f) + 0.5f;
+        int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
+        
         glUseProgram(shaderProgram);
+        glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
