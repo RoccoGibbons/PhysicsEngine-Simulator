@@ -21,25 +21,28 @@ const char *fragmentShaderSource = "#version 330 core\n"
     "   FragColor = vec4(ourColor, 1.0);\n"
     "}\n\0";
 
+
 // Check functions are local for use by build_shader() and error handling
 void checkVertex(unsigned int vertexShader);
 void checkFragment(unsigned int fragmentShader);
 void checkProgram(unsigned int shaderProgram);
 
 unsigned int buildShader() {
-
+    // Building vertex shader
     unsigned int vertexShader;
     vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
     glCompileShader(vertexShader);
     checkVertex(vertexShader);
 
+    // Building fragment shader
     unsigned int fragmentShader;
     fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
     glCompileShader(fragmentShader);
     checkFragment(fragmentShader);
 
+    // Compiling them into a single shader program
     unsigned int shaderProgram;
     shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);
@@ -55,9 +58,8 @@ unsigned int buildShader() {
 }
 
 
-
+//Checking for compile time errors in shader
 void checkVertex(unsigned int vertexShader) {
-    //Checking for compile time errors in shader
     int successVertex;
     char infologVertex[512];
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &successVertex);
