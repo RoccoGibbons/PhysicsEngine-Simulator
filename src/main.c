@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <math.h>
+#include <stb_image.h>
 
 #include <shader.h>
 
@@ -43,27 +44,35 @@ int main() {
     glUseProgram(shaderProgram);
 
     // Our rectangle shape (made of 2 triangles)
-    // float vertices[] = {
-    //     0.5f, 0.5f, 0.0f,
-    //     0.5f, -0.5f, 0.0f,
-    //     -0.5f, -0.5f, 0.0f,
-    //     -0.5f, 0.5f, 0.0f,
-    // };
-
     float vertices[] = {
-        // Vertices               Colours
-        -0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,
-         0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,
-         0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f
-    }; 
+        // Vertices         Colours           Texture coords
+        0.5f, 0.5f, 0.0f,   1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+        0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+        -0.5f, 0.5f, 0.0f,  0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+    };
+
+    unsigned int indices[] = {
+        0, 1, 3,
+        1, 2, 3,
+    };
+
+    // float vertices[] = {
+    //     // Vertices               Colours
+    //     -0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,
+    //      0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,
+    //      0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f
+    // }; 
 
     // unsigned int indices[] = {
-    //     0, 1, 3,
-    //     1, 2, 3,
+    //     0, 1, 2
     // };
-    unsigned int indices[] = {
-        0, 1, 2
-    };
+
+    // float texCoords[] = {
+    //     0.0f, 0.0f,
+    //     1.0f, 0.0f,
+    //     0.5f, 1.0f,
+    // };
 
     // We make our VBO, then we generate a buffer, then we bind this buffer to the array buffer, then copies the vertex data from our triangle into the buffers memory
     unsigned int VBO, VAO, EBO;  //VBO stands for Vertex Buffer Objects
@@ -81,12 +90,69 @@ int main() {
 
 
     // Position Attribute                            // stride length   offset 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
     // Colour Attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3*sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3*sizeof(float)));
     glEnableVertexAttribArray(1);
+
+    // Texture Attribute
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6*sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    // Textures
+    unsigned int texture1, texture2;
+
+    // Tex 1
+    glGenTextures(1, &texture1);
+    glBindTexture(GL_TEXTURE_2D, texture1);
+
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);    // S, T, R = X, Y, Z
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    int width, height, nrChannels;
+    stbi_set_flip_vertically_on_load(true);
+
+    unsigned char *data = stbi_load("resources/textures/container.jpg", &width, &height, &nrChannels, 0);
+    if(data) {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else {
+        printf("Failed to load texture");
+    }
+    stbi_image_free(data);
+
+    // Tex 2
+    glGenTextures(1, &texture2);
+    glBindTexture(GL_TEXTURE_2D, texture2);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    data = stbi_load("resources/textures/awesomeface.png", &width, &height, &nrChannels, 0);
+    if(data) {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else {
+        printf("Failed to load texture");
+    }
+
+    stbi_image_free(data);
+
+    glUseProgram(shaderProgram);
+    glUniform1i(glGetUniformLocation(shaderProgram, "texture1"), 0);
+    glUniform1i(glGetUniformLocation(shaderProgram, "texture2"), 1);
+
 
     // Render loop
     while(!glfwWindowShouldClose(window)) {
@@ -94,13 +160,20 @@ int main() {
         process_input(window);
 
         // Rendering
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        //glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        // glClearColor(0.2745f, 0.2863f, 0.3098f, 1.0f);
+        glClearColor(0.1882f, 0.1921f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         // float timeValue = glfwGetTime();
         // float greenValue =  (sin(timeValue) / 2.0f) + 0.5f;
         // int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
-        
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture1);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, texture2);        
+    
         glUseProgram(shaderProgram);
         // glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
 
