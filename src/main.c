@@ -1,9 +1,13 @@
 #include <glad/glad.h>   // This header has to be first for some reason -> remember this or else it crashess
 #include <GLFW/glfw3.h>
+
+#include <cglm/cglm.h>
+
+#include <stb_image.h>
+
 #include <stdio.h>
 #include <stdbool.h>
 #include <math.h>
-#include <stb_image.h>
 
 #include <shader.h>
 
@@ -169,10 +173,17 @@ int main() {
         // float greenValue =  (sin(timeValue) / 2.0f) + 0.5f;
         // int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
 
+        // Binding textures
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture1);
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, texture2);        
+        glBindTexture(GL_TEXTURE_2D, texture2);    
+
+        // Transformations
+        vec4 vec = {1.0f, 0.0f, 0.0f, 1.0f};
+        mat4 trans = glm_mat4(1.0f);
+        glm_translate(trans, (vec3){1.0f, 1.0f, 0.0f});
+        glm_mat4_mulv(trans, vec, vec);
     
         glUseProgram(shaderProgram);
         // glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
