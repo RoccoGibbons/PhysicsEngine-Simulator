@@ -180,13 +180,27 @@ int main() {
         glBindTexture(GL_TEXTURE_2D, texture2);    
 
         // Transformations
-        vec4 vec = {1.0f, 0.0f, 0.0f, 1.0f};
-        mat4 trans = glm_mat4(1.0f);
-        glm_translate(trans, (vec3){1.0f, 1.0f, 0.0f});
-        glm_mat4_mulv(trans, vec, vec);
+
+        // This is the first test, this translates a given vector one right and one up
+        // vec4 vec = {1.0f, 0.0f, 0.0f, 1.0f};
+        // mat4 trans;
+        // glm_mat4_identity(trans);
+        // glm_translate(trans, (vec3){1.0f, 1.0f, 0.0f});
+        // glm_mat4_mulv(trans, vec, vec);
+        // printf("%f, %f, %f\n", vec[0], vec[1], vec[2]);    // This checks if the transformation works, which it does!
+
+        mat4 trans;
+        glm_mat4_identity(trans);
+        // glm_translate(trans, (vec3){0.5f, -0.5f, 0.0f});
+        glm_rotate(trans, (float)glfwGetTime(), (vec3){0.0f, 0.0f, 1.0f});
+        // glm_scale(trans, (vec3){0.5, 0.5, 0.5});
+
     
         glUseProgram(shaderProgram);
         // glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+
+        unsigned int transformLoc = glGetUniformLocation(shaderProgram, "transform");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, trans[0]);
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
