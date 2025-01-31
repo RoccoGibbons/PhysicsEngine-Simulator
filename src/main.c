@@ -124,6 +124,33 @@ int main() {
     -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
 
+    
+    // glm::vec3 cubePositions[] = {
+    //     glm::vec3( 0.0f,  0.0f,  0.0f), 
+    //     glm::vec3( 2.0f,  5.0f, -15.0f), 
+    //     glm::vec3(-1.5f, -2.2f, -2.5f),  
+    //     glm::vec3(-3.8f, -2.0f, -12.3f),  
+    //     glm::vec3( 2.4f, -0.4f, -3.5f),  
+    //     glm::vec3(-1.7f,  3.0f, -7.5f),  
+    //     glm::vec3( 1.3f, -2.0f, -2.5f),  
+    //     glm::vec3( 1.5f,  2.0f, -2.5f), 
+    //     glm::vec3( 1.5f,  0.2f, -1.5f), 
+    //     glm::vec3(-1.3f,  1.0f, -1.5f)  
+    // };
+
+    vec3 cubePositions[] = {
+        {0.0f, 0.0f, 0.0f},
+        {2.0f,  5.0f, -15.0f},
+        {-1.5f, -2.2f, -2.5f},
+        {-3.8f, -2.0f, -12.3f},
+        {2.4f, -0.4f, -3.5f},
+        {-1.7f,  3.0f, -7.5f},
+        {1.3f, -2.0f, -2.5f},
+        {1.5f,  2.0f, -2.5f},
+        {1.5f,  0.2f, -1.5f},
+        {-1.3f,  1.0f, -1.5f},
+    };
+
     // We make our VBO, then we generate a buffer, then we bind this buffer to the array buffer, then copies the vertex data from our triangle into the buffers memory
     unsigned int VBO, VAO, EBO;  //VBO stands for Vertex Buffer Objects
 
@@ -249,9 +276,9 @@ int main() {
         // unsigned int transformLoc = glGetUniformLocation(shaderProgram, "transform");
         // glUniformMatrix4fv(transformLoc, 1, GL_FALSE, trans[0]);
 
-        mat4 model; 
-        glm_mat4_identity(model);
-        glm_rotate(model, (float)(glfwGetTime() * glm_rad(50.0f)), (vec3){0.5f, 1.0f, 0.0f});
+        // mat4 model; 
+        // glm_mat4_identity(model);
+        // glm_rotate(model, (float)(glfwGetTime() * glm_rad(50.0f)), (vec3){0.5f, 1.0f, 0.0f});
 
         mat4 view;
         glm_mat4_identity(view);
@@ -261,9 +288,6 @@ int main() {
         glm_mat4_identity(projection);
         glm_perspective(glm_rad(45.0f), 800.0f/ 600.0f, 0.1f, 100.0f, projection);
 
-        int modelloc = glGetUniformLocation(shaderProgram, "model");
-        glUniformMatrix4fv(modelloc, 1, GL_FALSE, model[0]);
-
         int viewloc = glGetUniformLocation(shaderProgram, "view");
         glUniformMatrix4fv(viewloc, 1, GL_FALSE, view[0]);
 
@@ -272,8 +296,22 @@ int main() {
 
 
         glBindVertexArray(VAO);
+
+        for(unsigned int i = 0; i < 10; i++){
+            mat4 model;
+            glm_mat4_identity(model);
+            glm_translate(model, cubePositions[i]);
+            float angle = 20.0f * i; 
+            glm_rotate(model, glm_rad(angle), (vec3){1.0f, 0.3f, 0.5f});
+            
+            int modelloc = glGetUniformLocation(shaderProgram, "model");
+            glUniformMatrix4fv(modelloc, 1, GL_FALSE, model[0]);
+
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
+
         // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        // glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
 
         // Check and call events and swap buffers
